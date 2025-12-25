@@ -137,9 +137,9 @@ const App: React.FC = () => {
   const selectedRecord = selectedRecordId ? storageService.getRecordById(selectedRecordId) : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 max-w-lg mx-auto shadow-xl relative">
-      {/* Header */}
-      <header className="bg-blue-600 text-white p-4 sticky top-0 z-50 flex items-center justify-between shadow-md">
+    <div className="min-h-screen bg-gray-50 pb-20 max-w-lg mx-auto shadow-xl relative print-container">
+      {/* Header - Hidden on print */}
+      <header className="bg-blue-600 text-white p-4 sticky top-0 z-50 flex items-center justify-between shadow-md no-print">
         {currentView !== 'dashboard' ? (
           <button onClick={() => setCurrentView('dashboard')} className="p-1 hover:bg-blue-700 rounded-full">
             <ChevronLeft size={24} />
@@ -332,7 +332,6 @@ const App: React.FC = () => {
                       <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border">
                         <img src={img} className="w-full h-full object-cover" />
                         <button 
-                          // Fixed reference error: 'index' should be 'idx'
                           onClick={() => removePhoto(idx, setPanoramaList)}
                           className="absolute top-1 right-1 bg-black/50 text-white p-1 rounded-full"
                         >
@@ -382,7 +381,7 @@ const App: React.FC = () => {
             <button
               onClick={handleSaveRecord}
               disabled={isSubmitting}
-              className={`w-full py-4 rounded-xl font-bold text-white shadow-xl flex items-center justify-center gap-2 transition-all active:scale-95 ${isSubmitting ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'}`}
+              className={`w-full py-4 rounded-xl font-bold text-white shadow-xl flex items-center justify-center gap-2 transition-all active:scale-95 no-print ${isSubmitting ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'}`}
             >
               {isSubmitting ? (
                 '儲存中...'
@@ -427,13 +426,28 @@ const App: React.FC = () => {
 
         {currentView === 'view-record' && selectedRecord && (
           <div className="space-y-6 pb-12">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+            {/* 僅列印顯示的報表頁首 */}
+            <div className="print-only text-center border-b-2 border-blue-800 pb-4 mb-6">
+              <h1 className="text-3xl font-black text-blue-800 mb-2">施工自主檢查報告</h1>
+              <div className="flex justify-between text-sm text-gray-600 px-2 mt-4">
+                <div className="text-left">
+                  <p><strong>工程名稱：</strong>柱筋施工自主檢查</p>
+                  <p><strong>查驗位置：</strong>{selectedRecord.location}</p>
+                </div>
+                <div className="text-right">
+                  <p><strong>查驗時機：</strong>{selectedRecord.stage}</p>
+                  <p><strong>查驗日期：</strong>{selectedRecord.timestamp}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6 print-block">
               <div className="flex justify-between items-start">
-                <div>
+                <div className="no-print">
                   <h2 className="text-2xl font-black text-blue-700">{selectedRecord.location}</h2>
                   <p className="text-sm text-gray-500 font-medium">{selectedRecord.timestamp}</p>
                 </div>
-                <div className="flex flex-col items-end gap-2">
+                <div className="flex flex-col items-end gap-2 no-print">
                   <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-bold">{selectedRecord.stage}</span>
                   <button onClick={() => handleDelete(selectedRecord.id)} className="text-red-500 p-2 hover:bg-red-50 rounded-full transition-colors">
                     <Trash2 size={20} />
@@ -441,11 +455,11 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* Checkbox Summary */}
-              <div className="bg-gray-50 rounded-xl p-4 space-y-4">
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">查驗清單與結果</h4>
+              {/* 查驗結果清單 */}
+              <div className="bg-gray-50 rounded-xl p-4 space-y-4 print:bg-transparent print:p-0">
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b pb-2 print:text-black">查驗清單與結果</h4>
                 {selectedRecord.items.map(item => (
-                  <div key={item.id} className="space-y-1 py-2 border-b border-gray-100 last:border-0">
+                  <div key={item.id} className="space-y-1 py-2 border-b border-gray-100 last:border-0 print:border-gray-200">
                     <div className="flex justify-between items-center text-sm">
                       <span className="font-bold text-gray-700">{item.label}</span>
                       <span className={`font-black ${item.status === CheckStatus.OK ? 'text-green-600' : item.status === CheckStatus.FAIL ? 'text-red-600' : 'text-gray-400'}`}>
@@ -453,74 +467,76 @@ const App: React.FC = () => {
                       </span>
                     </div>
                     {item.result && (
-                      <div className="text-xs bg-white px-2 py-1 rounded border border-gray-100 text-gray-600 italic">
-                        結果：{item.result}
+                      <div className="text-xs bg-white px-2 py-1 rounded border border-gray-100 text-gray-600 italic print:bg-gray-50">
+                        數據/結果：{item.result}
                       </div>
                     )}
                     {item.remark && (
-                      <div className="text-[10px] text-red-500 font-medium bg-red-50 px-2 py-1 rounded">
-                        備註：{item.remark}
+                      <div className="text-[10px] text-red-500 font-medium bg-red-50 px-2 py-1 rounded print:bg-red-50">
+                        異常備註：{item.remark}
                       </div>
                     )}
                   </div>
                 ))}
               </div>
 
-              {/* AI Insight */}
+              {/* AI 改善建議 */}
               {selectedRecord.aiAnalysis && (
-                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-4 rounded-xl border border-blue-100 space-y-2">
-                  <div className="flex items-center gap-2 text-indigo-700 font-bold text-sm">
-                    <Sparkles size={16} />
-                    <span>AI 改善建議助理</span>
+                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-4 rounded-xl border border-blue-100 space-y-2 print:bg-gray-50 print:border-gray-200 print-block">
+                  <div className="flex items-center gap-2 text-indigo-700 font-bold text-sm print:text-black">
+                    <Sparkles size={16} className="no-print" />
+                    <span>AI 改善建議與技術指導</span>
                   </div>
-                  <div className="text-xs text-indigo-900 leading-relaxed whitespace-pre-line">
+                  <div className="text-xs text-indigo-900 leading-relaxed whitespace-pre-line print:text-black">
                     {selectedRecord.aiAnalysis}
                   </div>
                 </div>
               )}
 
-              {/* Photos View */}
-              <div className="space-y-4">
+              {/* 多媒體附件區塊 */}
+              <div className="space-y-4 print-block">
                 {selectedRecord.photos.panorama.length > 0 && (
                   <div className="space-y-2">
-                    <span className="text-[10px] text-gray-400 font-bold uppercase">全景照 ({selectedRecord.photos.panorama.length})</span>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase print:text-black">全景照片</span>
                     <div className="grid grid-cols-2 gap-2">
                       {selectedRecord.photos.panorama.map((img, i) => (
-                        <img key={i} src={img} className="w-full aspect-square object-cover rounded-lg border shadow-sm" />
+                        <img key={i} src={img} className="w-full aspect-video object-cover rounded-lg border shadow-sm print:shadow-none" />
                       ))}
                     </div>
                   </div>
                 )}
                 {selectedRecord.photos.detail.length > 0 && (
-                  <div className="space-y-2">
-                    <span className="text-[10px] text-gray-400 font-bold uppercase">細部照 ({selectedRecord.photos.detail.length})</span>
+                  <div className="space-y-2 pt-2">
+                    <span className="text-[10px] text-gray-400 font-bold uppercase print:text-black">細部量測照片</span>
                     <div className="grid grid-cols-2 gap-2">
                       {selectedRecord.photos.detail.map((img, i) => (
-                        <img key={i} src={img} className="w-full aspect-square object-cover rounded-lg border shadow-sm" />
+                        <img key={i} src={img} className="w-full aspect-square object-cover rounded-lg border shadow-sm print:shadow-none" />
                       ))}
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Signatures View */}
-              <div className="grid grid-cols-1 gap-3 border-t pt-4">
+              {/* 簽名區塊 */}
+              <div className="grid grid-cols-1 gap-3 border-t pt-6 print:mt-8">
                 {selectedRecord.signatures.engineer && (
-                  <div className="text-center">
-                    <img src={selectedRecord.signatures.engineer} className="max-h-16 mx-auto" />
-                    <p className="text-[10px] text-gray-400 mt-1">現場工程師</p>
+                  <div className="text-right pr-4">
+                    <p className="text-sm font-bold text-gray-700 mb-2 print:text-black">現場工程師簽署：</p>
+                    <img src={selectedRecord.signatures.engineer} className="max-h-20 ml-auto inline-block" />
+                    <p className="text-[10px] text-gray-400 mt-1 print:text-black">{selectedRecord.timestamp}</p>
                   </div>
                 )}
               </div>
             </div>
 
+            {/* 功能按鈕 */}
             <div className="flex gap-3 no-print">
               <button 
                 onClick={() => window.print()} 
                 className="flex-1 bg-white border border-gray-200 text-gray-700 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-50 shadow-sm transition-all"
               >
                 <FileText size={18} />
-                匯出 PDF
+                匯出 PDF / 列印
               </button>
               <button 
                 className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 shadow-lg transition-all"
@@ -533,7 +549,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* Bottom Nav */}
+      {/* 底部導覽列 - Hidden on print */}
       <nav className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white border-t border-gray-200 px-6 py-3 flex justify-between items-center z-50 no-print">
         <button 
           onClick={() => setCurrentView('dashboard')}
@@ -562,7 +578,7 @@ const App: React.FC = () => {
 
       {/* Loading Overlay */}
       {aiLoading && (
-        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-8 text-center">
+        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-8 text-center no-print">
           <div className="bg-white p-6 rounded-2xl space-y-4 max-w-[280px]">
             <div className="animate-spin text-blue-600 mx-auto">
               <Sparkles size={40} />

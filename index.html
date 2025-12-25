@@ -15,23 +15,58 @@
       .signature-canvas {
         touch-action: none;
       }
+      
+      /* 列印專用樣式 */
       @media print {
         .no-print { display: none !important; }
         .print-only { display: block !important; }
+        
+        body { 
+          background-color: white !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+        
+        .print-container {
+          box-shadow: none !important;
+          border: none !important;
+          width: 100% !important;
+          max-width: none !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+        
+        /* 確保顏色能正確列印 */
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        
+        /* 防止圖片與區塊在頁面中間截斷 */
+        img, .print-block {
+          page-break-inside: avoid !important;
+        }
+        
+        h2 { color: #1d4ed8 !important; }
+        
+        /* 移除手機版邊距限制 */
+        main { padding: 0 !important; }
       }
+      
+      .print-only { display: none; }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
-  }
-}
-</script>
-</head>
+    <script type="importmap">
+    {
+      "imports": {
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+        "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
+      }
+    }
+    </script>
+  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="index.tsx"></script>
