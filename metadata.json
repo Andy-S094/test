@@ -1,0 +1,7 @@
+{
+  "name": "Copy of 營造現場自主檢查助手 (SiteCheck Pro)",
+  "description": "專為營造廠現場工程師設計的行動自主檢查工具，支援鋼筋工程查驗、拍照上傳、電子簽名及 AI 智能改善建議，並可自動匯整報表。",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
